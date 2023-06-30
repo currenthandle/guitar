@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 
 const NUM_STRINGS = 6
 const STRING_WIDTH = 2
+const X_PADDING = 50
 
 type CanvasDimensions = {
   width: number
@@ -13,12 +14,12 @@ type CanvasDimensions = {
 type CanvasContext = CanvasDimensions & { ctx: CanvasRenderingContext2D }
 
 function drawStrings({ ctx, height, width }: CanvasContext) {
-  const stringSpacing = width / (NUM_STRINGS - 1)
+  const stringSpacing = (width - 2 * X_PADDING) / (NUM_STRINGS - 1)
   ctx.lineWidth = STRING_WIDTH
   ctx.strokeStyle = '#000000'
 
   for (let i = 0; i < NUM_STRINGS; i++) {
-    const x = i * stringSpacing
+    const x = X_PADDING + i * stringSpacing
 
     ctx.beginPath()
     ctx.moveTo(x, 0)
@@ -59,7 +60,7 @@ export default function Guitar() {
     <canvas
       id='guitar'
       ref={canvasRef}
-      className='border-box w-full bg-white'
+      className='border-box w-7/12 bg-white'
     />
   )
 }
