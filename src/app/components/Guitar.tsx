@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 
 const NUM_STRINGS = 6
-const NUM_FRET_WIRES = 12
+const NUM_FRET_WIRES = 14
 
 const STRING_WIDTH = 2
 const FRET_WIRE_WIDTH = 6
@@ -11,6 +11,7 @@ const NUT_WIDTH = 10
 
 const X_PADDING = 50
 const TOP_PADDING = 50
+const BOTTOM_PADDING = 30
 
 type CanvasDimensions = {
   width: number
@@ -19,8 +20,11 @@ type CanvasDimensions = {
 
 type CanvasContext = CanvasDimensions & { ctx: CanvasRenderingContext2D }
 
+let fretSpacing = 0
+let stringSpacing = 0
+
 function drawFrets({ ctx, height, width }: CanvasContext) {
-  const fretSpacing = (height - TOP_PADDING) / NUM_FRET_WIRES
+  fretSpacing = (height - TOP_PADDING - BOTTOM_PADDING) / NUM_FRET_WIRES
   ctx.lineWidth = NUT_WIDTH
   ctx.strokeStyle = '#000000'
   ctx.beginPath()
@@ -30,17 +34,17 @@ function drawFrets({ ctx, height, width }: CanvasContext) {
 
   ctx.lineWidth = FRET_WIRE_WIDTH
   ctx.strokeStyle = '#000000'
-  for (let i = 0; i < NUM_FRET_WIRES; i++) {
+  for (let i = 0; i <= NUM_FRET_WIRES; i++) {
     const y = TOP_PADDING + i * fretSpacing
     ctx.beginPath()
-    ctx.moveTo(X_PADDING, y)
-    ctx.lineTo(width - X_PADDING, y)
+    ctx.moveTo(X_PADDING - STRING_WIDTH / 2, y)
+    ctx.lineTo(width - X_PADDING + STRING_WIDTH / 2, y)
     ctx.stroke()
   }
 }
 
 function drawStrings({ ctx, height, width }: CanvasContext) {
-  const stringSpacing = (width - 2 * X_PADDING) / (NUM_STRINGS - 1)
+  stringSpacing = (width - 2 * X_PADDING) / (NUM_STRINGS - 1)
   ctx.lineWidth = STRING_WIDTH
   ctx.strokeStyle = '#000000'
 
@@ -48,7 +52,7 @@ function drawStrings({ ctx, height, width }: CanvasContext) {
     const x = X_PADDING + i * stringSpacing
     ctx.beginPath()
     ctx.moveTo(x, TOP_PADDING)
-    ctx.lineTo(x, height)
+    ctx.lineTo(x, height - BOTTOM_PADDING)
     ctx.stroke()
   }
 }
@@ -57,6 +61,10 @@ function paintCanvas({ ctx, height, width }: CanvasContext) {
   ctx.clearRect(0, 0, width, height)
   drawStrings({ ctx, width, height })
   drawFrets({ ctx, width, height })
+}
+
+function drawNote() {
+  console.log('drawNote')
 }
 
 export default function Guitar() {
@@ -87,6 +95,7 @@ export default function Guitar() {
       id='guitar'
       ref={canvasRef}
       className='border-box w-7/12 bg-white'
+      onMouseDown={drawNote}
     />
   )
 }
