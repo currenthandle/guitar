@@ -128,7 +128,6 @@ const useFretboard = (
   }, [ctx, drawNote, canvasRef, notes])
 
   function addNote() {
-    console.log('add note')
     if (!ctx) return
     const { x, y } = coords
     const string = Math.round((x - X_PADDING) / stringSpacing.current) + 1
