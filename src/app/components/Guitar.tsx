@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { use, useEffect, useRef, useState } from 'react'
 
 import useMousePosition from '@/utils/useMousePosition'
 
@@ -27,12 +27,15 @@ type NotePosition = {
 
 type CanvasContext = CanvasDimensions & { ctx: CanvasRenderingContext2D }
 
-let fretSpacing = 0
-let stringSpacing = 0
+// let fretSpacing = 0
+// let stringSpacing = 0
 
 // async function drawNote(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
 
 export default function Guitar() {
+  const fretSpacing = useRef(0)
+  const stringSpacing = useRef(0)
+
   const [coords, handleCoords] = useMousePosition(false)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -44,7 +47,8 @@ export default function Guitar() {
   useEffect(() => {
     function drawFrets() {
       if (!ctx) return
-      fretSpacing = (height - TOP_PADDING - BOTTOM_PADDING) / NUM_FRET_WIRES
+      fretSpacing.current =
+        (height - TOP_PADDING - BOTTOM_PADDING) / NUM_FRET_WIRES
       ctx.lineWidth = NUT_WIDTH
       ctx.strokeStyle = '#000000'
       ctx.beginPath()
@@ -55,7 +59,7 @@ export default function Guitar() {
       ctx.lineWidth = FRET_WIRE_WIDTH
       ctx.strokeStyle = '#000000'
       for (let i = 0; i <= NUM_FRET_WIRES; i++) {
-        const y = TOP_PADDING + i * fretSpacing
+        const y = TOP_PADDING + i * fretSpacing.current
         ctx.beginPath()
         ctx.moveTo(X_PADDING - STRING_WIDTH / 2, y)
         ctx.lineTo(width - X_PADDING + STRING_WIDTH / 2, y)
@@ -65,12 +69,12 @@ export default function Guitar() {
 
     function drawStrings() {
       if (!ctx) return
-      stringSpacing = (width - 2 * X_PADDING) / (NUM_STRINGS - 1)
+      stringSpacing.current = (width - 2 * X_PADDING) / (NUM_STRINGS - 1)
       ctx.lineWidth = STRING_WIDTH
       ctx.strokeStyle = '#000000'
 
       for (let i = 0; i < NUM_STRINGS; i++) {
-        const x = X_PADDING + i * stringSpacing
+        const x = X_PADDING + i * stringSpacing.current
         ctx.beginPath()
         ctx.moveTo(x, TOP_PADDING)
         ctx.lineTo(x, height - BOTTOM_PADDING)
@@ -117,8 +121,9 @@ export default function Guitar() {
   function drawNote(note: NotePosition) {
     if (!ctx) return
     const { fret, string } = note
-    const x = X_PADDING + (string - 1) * stringSpacing
-    const y = TOP_PADDING + (fret - 1) * fretSpacing + fretSpacing / 2
+    const x = X_PADDING + (string - 1) * stringSpacing.current
+    const y =
+      TOP_PADDING + (fret - 1) * fretSpacing.current + fretSpacing.current / 2
 
     ctx.beginPath()
     ctx.arc(x, y, 10, 0, 2 * Math.PI)
@@ -128,8 +133,8 @@ export default function Guitar() {
   function addNote() {
     if (!ctx) return
     const { x, y } = coords
-    const string = Math.round((x - X_PADDING) / stringSpacing) + 1
-    const fret = Math.floor((y - TOP_PADDING) / fretSpacing) + 1
+    const string = Math.round((x - X_PADDING) / stringSpacing.current) + 1
+    const fret = Math.floor((y - TOP_PADDING) / fretSpacing.current) + 1
     const newNote = { string, fret }
     console.log('new note', newNote)
     drawNote(newNote)
