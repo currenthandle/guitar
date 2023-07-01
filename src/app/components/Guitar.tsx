@@ -24,7 +24,7 @@ export default function Guitar() {
       }}
       id='guitar'
       ref={canvasRef}
-      className='border-box w-7/12 bg-white'
+      className=' w-7/12 bg-white h-full '
     />
   )
 }
