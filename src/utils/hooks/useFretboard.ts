@@ -27,6 +27,21 @@ const useFretboard = (
   const width = useRef(0)
   const height = useRef(0)
 
+  function drawLine(
+    ctx: CanvasRenderingContext2D,
+    [x1, y1]: [number, number],
+    [x2, y2]: [number, number],
+    [width, color]: [number, string]
+  ) {
+    if (!ctx) return
+    ctx.lineWidth = width
+    ctx.strokeStyle = color
+    ctx.beginPath()
+    ctx.moveTo(x1, y1)
+    ctx.lineTo(x2, y2)
+    ctx.stroke()
+  }
+
   const drawNote = useCallback(
     (note: NotePosition) => {
       if (!ctx) return
@@ -43,51 +58,54 @@ const useFretboard = (
     [ctx]
   )
 
-  function drawFrets(
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number
-  ) {
-    if (!ctx) return
-    fretSpacing.current =
-      (height - TOP_PADDING - BOTTOM_PADDING) / NUM_FRET_WIRES
-    ctx.lineWidth = NUT_WIDTH
-    ctx.strokeStyle = '#000000'
-    ctx.beginPath()
-    ctx.moveTo(X_PADDING - STRING_WIDTH / 2, TOP_PADDING)
-    ctx.lineTo(width - X_PADDING + STRING_WIDTH / 2, TOP_PADDING)
-    ctx.stroke()
-
-    ctx.lineWidth = FRET_WIRE_WIDTH
-    ctx.strokeStyle = '#000000'
-    for (let i = 0; i <= NUM_FRET_WIRES; i++) {
-      const y = TOP_PADDING + i * fretSpacing.current
-      ctx.beginPath()
-      ctx.moveTo(X_PADDING - STRING_WIDTH / 2, y)
-      ctx.lineTo(width - X_PADDING + STRING_WIDTH / 2, y)
-      ctx.stroke()
-    }
-  }
-
-  function drawStrings(
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number
-  ) {
-    if (!ctx) return
-    stringSpacing.current = (width - 2 * X_PADDING) / (NUM_STRINGS - 1)
-    ctx.lineWidth = STRING_WIDTH
-    ctx.strokeStyle = '#000000'
-
-    for (let i = 0; i < NUM_STRINGS; i++) {
-      const x = X_PADDING + i * stringSpacing.current
-      ctx.beginPath()
-      ctx.moveTo(x, TOP_PADDING)
-      ctx.lineTo(x, height - BOTTOM_PADDING)
-      ctx.stroke()
-    }
-  }
   useEffect(() => {
+    function drawFrets(
+      ctx: CanvasRenderingContext2D,
+      width: number,
+      height: number
+    ) {
+      if (!ctx) return
+      fretSpacing.current =
+        (height - TOP_PADDING - BOTTOM_PADDING) / NUM_FRET_WIRES
+
+      drawLine(
+        ctx,
+        [X_PADDING - STRING_WIDTH / 2, TOP_PADDING],
+        [width - X_PADDING + STRING_WIDTH / 2, TOP_PADDING],
+        [NUT_WIDTH, '#000000']
+      )
+
+      for (let i = 0; i <= NUM_FRET_WIRES; i++) {
+        const y = TOP_PADDING + i * fretSpacing.current
+        drawLine(
+          ctx,
+          [X_PADDING - STRING_WIDTH / 2, y],
+          [width - X_PADDING + STRING_WIDTH / 2, y],
+          [FRET_WIRE_WIDTH, '#000000']
+        )
+      }
+    }
+
+    function drawStrings(
+      ctx: CanvasRenderingContext2D,
+      width: number,
+      height: number
+    ) {
+      if (!ctx) return
+      stringSpacing.current = (width - 2 * X_PADDING) / (NUM_STRINGS - 1)
+      ctx.lineWidth = STRING_WIDTH
+      ctx.strokeStyle = '#000000'
+
+      for (let i = 0; i < NUM_STRINGS; i++) {
+        const x = X_PADDING + i * stringSpacing.current
+        drawLine(
+          ctx,
+          [x, TOP_PADDING],
+          [x, height - BOTTOM_PADDING],
+          [STRING_WIDTH, '#000000']
+        )
+      }
+    }
     function paintCanvas() {
       if (!ctx) return
 
