@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useEffect, useRef, useState } from 'react'
+import { use, useCallback, useEffect, useRef, useState } from 'react'
 
 import useMousePosition from '@/utils/useMousePosition'
 
@@ -44,49 +44,73 @@ export default function Guitar() {
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null)
   const [notes, setNotes] = useState<NotePosition[]>([])
 
-  useEffect(() => {
-    function drawFrets() {
+  const drawNote = useCallback(
+    (note: NotePosition) => {
       if (!ctx) return
-      fretSpacing.current =
-        (height - TOP_PADDING - BOTTOM_PADDING) / NUM_FRET_WIRES
-      ctx.lineWidth = NUT_WIDTH
-      ctx.strokeStyle = '#000000'
+      const { fret, string } = note
+      const x = X_PADDING + (string - 1) * stringSpacing.current
+      const y =
+        TOP_PADDING + (fret - 1) * fretSpacing.current + fretSpacing.current / 2
+
       ctx.beginPath()
-      ctx.moveTo(X_PADDING - STRING_WIDTH / 2, TOP_PADDING)
-      ctx.lineTo(width - X_PADDING + STRING_WIDTH / 2, TOP_PADDING)
+      ctx.arc(x, y, 10, 0, 2 * Math.PI)
+      ctx.fillStyle = 'blue'
+      ctx.fill()
+    },
+    [ctx]
+  )
+
+  function drawFrets(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number
+  ) {
+    if (!ctx) return
+    fretSpacing.current =
+      (height - TOP_PADDING - BOTTOM_PADDING) / NUM_FRET_WIRES
+    ctx.lineWidth = NUT_WIDTH
+    ctx.strokeStyle = '#000000'
+    ctx.beginPath()
+    ctx.moveTo(X_PADDING - STRING_WIDTH / 2, TOP_PADDING)
+    ctx.lineTo(width - X_PADDING + STRING_WIDTH / 2, TOP_PADDING)
+    ctx.stroke()
+
+    ctx.lineWidth = FRET_WIRE_WIDTH
+    ctx.strokeStyle = '#000000'
+    for (let i = 0; i <= NUM_FRET_WIRES; i++) {
+      const y = TOP_PADDING + i * fretSpacing.current
+      ctx.beginPath()
+      ctx.moveTo(X_PADDING - STRING_WIDTH / 2, y)
+      ctx.lineTo(width - X_PADDING + STRING_WIDTH / 2, y)
       ctx.stroke()
-
-      ctx.lineWidth = FRET_WIRE_WIDTH
-      ctx.strokeStyle = '#000000'
-      for (let i = 0; i <= NUM_FRET_WIRES; i++) {
-        const y = TOP_PADDING + i * fretSpacing.current
-        ctx.beginPath()
-        ctx.moveTo(X_PADDING - STRING_WIDTH / 2, y)
-        ctx.lineTo(width - X_PADDING + STRING_WIDTH / 2, y)
-        ctx.stroke()
-      }
     }
+  }
 
-    function drawStrings() {
-      if (!ctx) return
-      stringSpacing.current = (width - 2 * X_PADDING) / (NUM_STRINGS - 1)
-      ctx.lineWidth = STRING_WIDTH
-      ctx.strokeStyle = '#000000'
+  function drawStrings(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number
+  ) {
+    if (!ctx) return
+    stringSpacing.current = (width - 2 * X_PADDING) / (NUM_STRINGS - 1)
+    ctx.lineWidth = STRING_WIDTH
+    ctx.strokeStyle = '#000000'
 
-      for (let i = 0; i < NUM_STRINGS; i++) {
-        const x = X_PADDING + i * stringSpacing.current
-        ctx.beginPath()
-        ctx.moveTo(x, TOP_PADDING)
-        ctx.lineTo(x, height - BOTTOM_PADDING)
-        ctx.stroke()
-      }
+    for (let i = 0; i < NUM_STRINGS; i++) {
+      const x = X_PADDING + i * stringSpacing.current
+      ctx.beginPath()
+      ctx.moveTo(x, TOP_PADDING)
+      ctx.lineTo(x, height - BOTTOM_PADDING)
+      ctx.stroke()
     }
+  }
+  useEffect(() => {
     function paintCanvas() {
       if (!ctx) return
 
       ctx.clearRect(0, 0, width, height)
-      drawStrings()
-      drawFrets()
+      drawStrings(ctx, width, height)
+      drawFrets(ctx, width, height)
       notes.forEach((note) => {
         drawNote({
           fret: note.fret,
@@ -117,38 +141,24 @@ export default function Guitar() {
     return () => {
       window.removeEventListener('resize', handlePaint)
     }
-  }, [width, height, ctx])
-  function drawNote(note: NotePosition) {
-    if (!ctx) return
-    const { fret, string } = note
-    const x = X_PADDING + (string - 1) * stringSpacing.current
-    const y =
-      TOP_PADDING + (fret - 1) * fretSpacing.current + fretSpacing.current / 2
+  }, [width, height, ctx, notes, drawNote])
 
-    ctx.beginPath()
-    ctx.arc(x, y, 10, 0, 2 * Math.PI)
-    ctx.fillStyle = 'blue'
-    ctx.fill()
-  }
   function addNote() {
     if (!ctx) return
     const { x, y } = coords
     const string = Math.round((x - X_PADDING) / stringSpacing.current) + 1
     const fret = Math.floor((y - TOP_PADDING) / fretSpacing.current) + 1
     const newNote = { string, fret }
-    console.log('new note', newNote)
+    // console.log('new note', newNote)
     drawNote(newNote)
     setNotes([...notes, newNote])
   }
-  //   console.log('notees', notes)
   return (
     <canvas
       onMouseMove={(e) => {
         handleCoords(e as unknown as MouseEvent)
       }}
       onMouseDown={(e) => {
-        // console.log('mouse down')
-        handleCoords(e as unknown as MouseEvent)
         if (canvasRef.current) {
           const canvas = canvasRef.current
           const ctx = canvas?.getContext('2d')
@@ -158,7 +168,6 @@ export default function Guitar() {
       id='guitar'
       ref={canvasRef}
       className='border-box w-7/12 bg-white'
-      //   onMouseDown={drawNote}
     />
   )
 }
