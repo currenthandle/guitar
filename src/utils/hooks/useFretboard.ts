@@ -20,12 +20,12 @@ const useFretboard = (
   coords: { x: number; y: number }
 ) => {
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null)
-  const [notes, setNotes] = useState<NotePosition[]>([])
 
   const fretSpacing = useRef(0)
   const stringSpacing = useRef(0)
   const width = useRef(0)
   const height = useRef(0)
+  const notes = useRef<NotePosition[]>([])
 
   function drawLine(
     ctx: CanvasRenderingContext2D,
@@ -112,7 +112,7 @@ const useFretboard = (
       ctx.clearRect(0, 0, width.current, height.current)
       drawStrings(ctx, width.current, height.current)
       drawFrets(ctx, width.current, height.current)
-      notes.forEach((note) => {
+      notes.current.forEach((note) => {
         drawNote({
           fret: note.fret,
           string: note.string,
@@ -152,7 +152,7 @@ const useFretboard = (
     const fret = Math.floor((y - TOP_PADDING) / fretSpacing.current) + 1
     const newNote = { string, fret }
     drawNote(newNote)
-    setNotes([...notes, newNote])
+    notes.current = [...notes.current, newNote]
   }
 
   return addNote
