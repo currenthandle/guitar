@@ -15,7 +15,8 @@ export const useControls = create<ControlsState>((set) => ({
 }))
 
 export default function CaptureButton() {
-  const { capturing, toggleCapturing } = useControls()
+  const { capturing, toggleCapturing, animating, toggleAnimating } =
+    useControls()
   return (
     <div>
       <button
@@ -26,7 +27,14 @@ export default function CaptureButton() {
       >
         {capturing ? 'Finish' : 'Capture'}
       </button>
-      <button className='bg-orange-400 p-4 w-24 rounded-lg'>Animate</button>
+      <button
+        onClick={toggleAnimating}
+        className={`${
+          animating ? 'bg-pink-400' : 'bg-orange-400'
+        } p-4 w-24 rounded-lg`}
+      >
+        {animating ? 'Stop' : 'Animate'}
+      </button>
     </div>
   )
 }
