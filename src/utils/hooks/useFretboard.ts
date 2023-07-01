@@ -137,7 +137,7 @@ const useFretboard = (
     setNotes([...notes, newNote])
   }
 
-  return { addNote }
+  return addNote
 }
 
 export default useFretboard

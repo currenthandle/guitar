@@ -9,7 +9,7 @@ export default function Guitar() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const { addNote } = useFretBoard(canvasRef, coords)
+  const addNote = useFretBoard(canvasRef, coords)
   return (
     <canvas
       onMouseMove={(e) => {
