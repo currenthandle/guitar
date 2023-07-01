@@ -19,8 +19,7 @@ const useFretboard = (
   canvasRef: RefObject<HTMLCanvasElement>,
   coords: { x: number; y: number }
 ) => {
-  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null)
-
+  const ctx = useRef<CanvasRenderingContext2D | null>(null)
   const fretSpacing = useRef(0)
   const stringSpacing = useRef(0)
   const width = useRef(0)
@@ -44,16 +43,16 @@ const useFretboard = (
 
   const drawNote = useCallback(
     (note: NotePosition) => {
-      if (!ctx) return
+      if (!ctx.current) return
       const { fret, string } = note
       const x = X_PADDING + (string - 1) * stringSpacing.current
       const y =
         TOP_PADDING + (fret - 1) * fretSpacing.current + fretSpacing.current / 2
 
-      ctx.beginPath()
-      ctx.arc(x, y, fretSpacing.current / 6, 0, 2 * Math.PI)
-      ctx.fillStyle = 'blue'
-      ctx.fill()
+      ctx.current.beginPath()
+      ctx.current.arc(x, y, fretSpacing.current / 6, 0, 2 * Math.PI)
+      ctx.current.fillStyle = 'blue'
+      ctx.current.fill()
     },
     [ctx]
   )
@@ -107,11 +106,11 @@ const useFretboard = (
       }
     }
     function paintCanvas() {
-      if (!ctx) return
+      if (!ctx.current) return
 
-      ctx.clearRect(0, 0, width.current, height.current)
-      drawStrings(ctx, width.current, height.current)
-      drawFrets(ctx, width.current, height.current)
+      ctx.current.clearRect(0, 0, width.current, height.current)
+      drawStrings(ctx.current, width.current, height.current)
+      drawFrets(ctx.current, width.current, height.current)
       notes.current.forEach((note) => {
         drawNote({
           fret: note.fret,
@@ -122,8 +121,8 @@ const useFretboard = (
     const handlePaint = () => {
       if (!canvasRef.current) return
       const canvas = canvasRef.current
-      const ctx = canvas?.getContext('2d')
-      if (!ctx) return
+      ctx.current = canvas?.getContext('2d')
+      if (!ctx.current) return
 
       const { width: w, height: h } = canvasRef.current.getBoundingClientRect()
 
@@ -133,7 +132,6 @@ const useFretboard = (
       width.current = w
       height.current = h
 
-      setCtx(ctx)
       paintCanvas()
     }
     handlePaint()
@@ -143,10 +141,10 @@ const useFretboard = (
     return () => {
       window.removeEventListener('resize', handlePaint)
     }
-  }, [ctx, drawNote, canvasRef, notes])
+  }, [ctx.current, drawNote, canvasRef, notes])
 
   function addNote() {
-    if (!ctx) return
+    // if (!ctx) return
     const { x, y } = coords
     const string = Math.round((x - X_PADDING) / stringSpacing.current) + 1
     const fret = Math.floor((y - TOP_PADDING) / fretSpacing.current) + 1
