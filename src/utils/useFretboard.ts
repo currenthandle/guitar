@@ -36,7 +36,7 @@ const useFretboard = (
         TOP_PADDING + (fret - 1) * fretSpacing.current + fretSpacing.current / 2
 
       ctx.beginPath()
-      ctx.arc(x, y, 10, 0, 2 * Math.PI)
+      ctx.arc(x, y, fretSpacing.current / 6, 0, 2 * Math.PI)
       ctx.fillStyle = 'blue'
       ctx.fill()
     },
@@ -124,7 +124,7 @@ const useFretboard = (
     return () => {
       window.removeEventListener('resize', handlePaint)
     }
-  }, [width, height, ctx, drawNote, canvasRef])
+  }, [width, height, ctx, drawNote, canvasRef, notes])
 
   function addNote() {
     console.log('add note')
