@@ -19,8 +19,6 @@ const useFretboard = (
   canvasRef: RefObject<HTMLCanvasElement>,
   coords: { x: number; y: number }
 ) => {
-  // const [width, setWidth] = useState(0)
-  // const [height, setHeight] = useState(0)
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null)
   const [notes, setNotes] = useState<NotePosition[]>([])
 
