@@ -94,12 +94,12 @@ const useFretboard = (
       ctx.clearRect(0, 0, width, height)
       drawStrings(ctx, width, height)
       drawFrets(ctx, width, height)
-      //   notes.forEach((note) => {
-      //     drawNote({
-      //       fret: note.fret,
-      //       string: note.string,
-      //     })
-      //   })
+      notes.forEach((note) => {
+        drawNote({
+          fret: note.fret,
+          string: note.string,
+        })
+      })
     }
     const handlePaint = () => {
       if (!canvasRef.current) return
