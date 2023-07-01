@@ -20,6 +20,11 @@ type CanvasDimensions = {
   height: number
 }
 
+type NotePosition = {
+  fret: number
+  string: number
+}
+
 type CanvasContext = CanvasDimensions & { ctx: CanvasRenderingContext2D }
 
 let fretSpacing = 0
@@ -28,12 +33,13 @@ let stringSpacing = 0
 // async function drawNote(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
 
 export default function Guitar() {
-  const [coords, handleCoords] = useMousePosition(true)
+  const [coords, handleCoords] = useMousePosition(false)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(0)
   const [height, setHeight] = useState(0)
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null)
+  const [notes, setNotes] = useState<NotePosition[]>([])
 
   useEffect(() => {
     function drawFrets() {
@@ -102,26 +108,40 @@ export default function Guitar() {
       window.removeEventListener('resize', handlePaint)
     }
   }, [width, height, ctx])
-  function drawNote() {
+  function drawNote(note: NotePosition) {
     if (!ctx) return
+    const { fret, string } = note
+    const x = X_PADDING + (string - 1) * stringSpacing
+    const y = TOP_PADDING + (fret - 1) * fretSpacing + fretSpacing / 2
+
     ctx.beginPath()
-    ctx.arc(coords.x, coords.y, 10, 0, 2 * Math.PI)
+    ctx.arc(x, y, 10, 0, 2 * Math.PI)
     ctx.fillStyle = 'blue'
     ctx.fill()
   }
+  function addNote() {
+    if (!ctx) return
+    const { x, y } = coords
+    const string = Math.round((x - X_PADDING) / stringSpacing) + 1
+    const fret = Math.floor((y - TOP_PADDING) / fretSpacing) + 1
+    const newNote = { string, fret }
+    console.log('new note', newNote)
+    drawNote(newNote)
+    setNotes([...notes, newNote])
+  }
+  //   console.log('notees', notes)
   return (
     <canvas
+      onMouseMove={(e) => {
+        handleCoords(e as unknown as MouseEvent)
+      }}
       onMouseDown={(e) => {
+        // console.log('mouse down')
         handleCoords(e as unknown as MouseEvent)
         if (canvasRef.current) {
-          //   const ctx = canvasRef.current.getContext('2d')
-          //   ctx?.strokeRect(coords.x, coords.y, 40, 50)
           const canvas = canvasRef.current
           const ctx = canvas?.getContext('2d')
-          drawNote()
-          //   if (!ctx) return
-          //   const cvs: CanvasContext = { width, height, ctx }
-          //   drawNote(coords)
+          addNote()
         }
       }}
       id='guitar'
