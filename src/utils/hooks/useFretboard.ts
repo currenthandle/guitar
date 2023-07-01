@@ -9,6 +9,7 @@ import {
   TOP_PADDING,
   X_PADDING,
 } from '../constant'
+import { useControls } from '@/app/components/Header'
 
 type NotePosition = {
   fret: number
@@ -25,6 +26,9 @@ const useFretboard = (
   const width = useRef(0)
   const height = useRef(0)
   const notes = useRef<NotePosition[]>([])
+  const noteIndex = useRef(0)
+
+  const { animating } = useControls()
 
   function drawLine(
     ctx: CanvasRenderingContext2D,
@@ -111,12 +115,23 @@ const useFretboard = (
       ctx.current.clearRect(0, 0, width.current, height.current)
       drawStrings(ctx.current, width.current, height.current)
       drawFrets(ctx.current, width.current, height.current)
-      notes.current.forEach((note) => {
-        drawNote({
-          fret: note.fret,
-          string: note.string,
+      console.log('animating', animating)
+      if (animating) {
+        if (noteIndex.current >= notes.current.length) {
+          noteIndex.current = 0
+        }
+        const note = notes.current[noteIndex.current]
+        drawNote(note)
+        setTimeout(paintCanvas, 1000)
+        noteIndex.current++
+      } else {
+        notes.current.forEach((note) => {
+          drawNote({
+            fret: note.fret,
+            string: note.string,
+          })
         })
-      })
+      }
     }
     const handlePaint = () => {
       if (!canvasRef.current) return
@@ -141,7 +156,7 @@ const useFretboard = (
     return () => {
       window.removeEventListener('resize', handlePaint)
     }
-  }, [ctx.current, drawNote, canvasRef, notes])
+  }, [ctx.current, drawNote, canvasRef, notes, animating])
 
   function addNote() {
     // if (!ctx) return
