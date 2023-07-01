@@ -83,6 +83,12 @@ export default function Guitar() {
       ctx.clearRect(0, 0, width, height)
       drawStrings()
       drawFrets()
+      notes.forEach((note) => {
+        drawNote({
+          fret: note.fret,
+          string: note.string,
+        })
+      })
     }
     const handlePaint = () => {
       if (!canvasRef.current) return
