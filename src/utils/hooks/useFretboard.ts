@@ -19,13 +19,15 @@ const useFretboard = (
   canvasRef: RefObject<HTMLCanvasElement>,
   coords: { x: number; y: number }
 ) => {
-  const [width, setWidth] = useState(0)
-  const [height, setHeight] = useState(0)
+  // const [width, setWidth] = useState(0)
+  // const [height, setHeight] = useState(0)
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null)
   const [notes, setNotes] = useState<NotePosition[]>([])
 
   const fretSpacing = useRef(0)
   const stringSpacing = useRef(0)
+  const width = useRef(0)
+  const height = useRef(0)
 
   const drawNote = useCallback(
     (note: NotePosition) => {
@@ -91,9 +93,9 @@ const useFretboard = (
     function paintCanvas() {
       if (!ctx) return
 
-      ctx.clearRect(0, 0, width, height)
-      drawStrings(ctx, width, height)
-      drawFrets(ctx, width, height)
+      ctx.clearRect(0, 0, width.current, height.current)
+      drawStrings(ctx, width.current, height.current)
+      drawFrets(ctx, width.current, height.current)
       notes.forEach((note) => {
         drawNote({
           fret: note.fret,
@@ -107,14 +109,15 @@ const useFretboard = (
       const ctx = canvas?.getContext('2d')
       if (!ctx) return
 
-      const { width, height } = canvas?.getBoundingClientRect()
-      canvas.width = width
-      canvas.height = height
-      //   const cvs: CanvasContext = { width, height, ctx }
-      setWidth(width)
-      setHeight(height)
-      setCtx(ctx)
+      const { width: w, height: h } = canvasRef.current.getBoundingClientRect()
 
+      canvas.width = w
+      canvas.height = h
+
+      width.current = w
+      height.current = h
+
+      setCtx(ctx)
       paintCanvas()
     }
     handlePaint()
@@ -124,7 +127,7 @@ const useFretboard = (
     return () => {
       window.removeEventListener('resize', handlePaint)
     }
-  }, [width, height, ctx, drawNote, canvasRef, notes])
+  }, [ctx, drawNote, canvasRef, notes])
 
   function addNote() {
     console.log('add note')
