@@ -8,7 +8,7 @@ import {
   STRING_WIDTH,
   TOP_PADDING,
   X_PADDING,
-} from './constant'
+} from '../constant'
 
 type NotePosition = {
   fret: number
@@ -133,7 +133,6 @@ const useFretboard = (
     const string = Math.round((x - X_PADDING) / stringSpacing.current) + 1
     const fret = Math.floor((y - TOP_PADDING) / fretSpacing.current) + 1
     const newNote = { string, fret }
-    // console.log('new note', newNote)
     drawNote(newNote)
     setNotes([...notes, newNote])
   }

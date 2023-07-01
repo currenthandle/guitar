@@ -1,18 +1,8 @@
 'use client'
 
-import useMousePosition from '@/utils/useMousePosition'
-import useFretBoard from '@/utils/useFretboard'
+import useMousePosition from '@/utils/hooks/useMousePosition'
+import useFretBoard from '@/utils/hooks/useFretboard'
 import { useRef } from 'react'
-
-type CanvasDimensions = {
-  width: number
-  height: number
-}
-
-type NotePosition = {
-  fret: number
-  string: number
-}
 
 export default function Guitar() {
   const [coords, handleCoords] = useMousePosition(false)
